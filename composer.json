@@ -1,0 +1,17 @@
+{
+    "name": "fengkui/supports",
+    "description": "相关程序支持",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fengkui",
+            "email": "1161634940@qq.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "fengkui\\": "src"
+        }
+    },
+    "require": {}
+}
