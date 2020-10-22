@@ -3,9 +3,9 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-14T14:29:57+08:00
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-22 16:00:42
+ * @Last Modified time: 2020-10-22T17:07:04+08:00
  */
-namespace feng\Supports;
+namespace fengkui\Supports;
 
 /**
  * Http 请求类
