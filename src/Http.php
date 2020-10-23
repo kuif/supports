@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-14T14:29:57+08:00
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-22T17:45:24+08:00
+ * @Last Modified time: 2020-10-23T10:29:17+08:00
  */
 namespace fengkui\Supports;
 
@@ -83,8 +83,8 @@ class Http
         if (isset($pem['cert']) && isset($pem['key'])) { // 设置证书
             // 使用证书：cert 与 key 分别属于两个.pem文件
             foreach ($pem as $key => $value) {
-                curl_setopt($ch, CURLOPT_SSL.strtoupper($key).TYPE, 'PEM');
-                curl_setopt($ch, CURLOPT_SSL.strtoupper($key), $value);
+                curl_setopt($ci, CURLOPT_SSL.strtoupper($key).TYPE, 'PEM');
+                curl_setopt($ci, CURLOPT_SSL.strtoupper($key), $value);
             }
             // //默认格式为PEM，可以注释
             // curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');
