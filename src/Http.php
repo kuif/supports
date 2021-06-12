@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-14T14:29:57+08:00
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2020-10-23T10:29:17+08:00
+ * @Last Modified time: 2021-06-12T11:32:16+08:00
  */
 namespace fengkui\Supports;
 
@@ -33,9 +33,9 @@ class Http
      * @param array  $options 扩展参数
      * @return mixed|string
      */
-    public static function get($url, $params = [])
+    public static function get($url, $params = [], $headers = [])
     {
-        $result = self::httpRequest($url, 'GET', $params);
+        $result = self::httpRequest($url, 'GET', $params, $headers);
         return $result;
     }
 
