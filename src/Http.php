@@ -64,8 +64,25 @@ class Http
             case "POST":
                 curl_setopt($ci, CURLOPT_POST, TRUE);
                 if (!empty($params)) {
-                    $tmpdatastr = is_array($params) ? http_build_query($params) : $params;
-                    curl_setopt($ci, CURLOPT_POSTFIELDS, $tmpdatastr);
+                    if (is_array($params)) {
+                        foreach ($params as $k => $v) {
+                            if("@" == substr($v, 0, 1)) { //判断是不是文件上传（文件上传用multipart/form-data）
+                                $postMultipart = true;
+                                if(class_exists('\CURLFile')){
+                                    $params[$k] = new \CURLFile(substr($v, 1));
+                                    curl_setopt($ci, CURLOPT_SAFE_UPLOAD, true);
+                                } else {
+                                    if (defined('CURLOPT_SAFE_UPLOAD')) {
+                                        curl_setopt($ci, CURLOPT_SAFE_UPLOAD, false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // $tmpdatastr = is_array($params) ? http_build_query($params) : $params;
+                    // curl_setopt($ci, CURLOPT_POSTFIELDS, $tmpdatastr);
+                    $postFields = (is_array($params) && empty($postMultipart)) ? http_build_query($params) : $params;
+                    curl_setopt($ci, CURLOPT_POSTFIELDS, $postFields);
                 }
                 break;
             default:
@@ -83,16 +100,13 @@ class Http
         if (isset($pem['cert']) && isset($pem['key'])) { // 设置证书
             // 使用证书：cert 与 key 分别属于两个.pem文件
             foreach ($pem as $key => $value) {
-                curl_setopt($ci, CURLOPT_SSL.strtoupper($key).TYPE, 'PEM');
-                curl_setopt($ci, CURLOPT_SSL.strtoupper($key), $value);
+                // CERT    CURLOPT_SSLCERTTYPE    CURLOPT_SSLCERT
+                // KEY    CURLOPT_SSLKEYTYPE    CURLOPT_SSLKEY
+                curl_setopt($ci, constant('CURLOPT_SSL'.strtoupper($key).'TYPE'), 'PEM');
+                curl_setopt($ci, constant('CURLOPT_SSL'.strtoupper($key)), $value);
             }
-            // //默认格式为PEM，可以注释
-            // curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');
-            // curl_setopt($ch,CURLOPT_SSLCERT, self::$sslcert_path);
-            // //默认格式为PEM，可以注释
-            // curl_setopt($ch,CURLOPT_SSLKEYTYPE,'PEM');
-            // curl_setopt($ch,CURLOPT_SSLKEY, self::$sslkey_path);
         }
+        // die;
         //curl_setopt($ci, CURLOPT_HEADER, true); /*启用时会将头文件的信息作为数据流输出*/
         if (ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
         	curl_setopt($ci, CURLOPT_FOLLOWLOCATION, 1);
