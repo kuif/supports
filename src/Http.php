@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-14T14:29:57+08:00
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2021-06-12T11:32:16+08:00
+ * @Last Modified time: 2023-12-27 16:55:37
  */
 namespace fengkui\Supports;
 
@@ -57,7 +57,7 @@ class Http
         curl_setopt($ci, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
         curl_setopt($ci, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36");
         // curl_setopt($ci, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); // 用户访问代理 User-Agent
-        curl_setopt($ci, CURLOPT_CONNECTTIMEOUT,$timeout); /* 在发起连接前等待的时间，如果设置为0，则无限等待 */
+        curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $timeout); /* 在发起连接前等待的时间，如果设置为0，则无限等待 */
         curl_setopt($ci, CURLOPT_TIMEOUT, 7); /* 设置cURL允许执行的最长秒数 */
         curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
         switch ($method) {
@@ -106,29 +106,51 @@ class Http
                 curl_setopt($ci, constant('CURLOPT_SSL'.strtoupper($key)), $value);
             }
         }
-        // die;
-        //curl_setopt($ci, CURLOPT_HEADER, true); /*启用时会将头文件的信息作为数据流输出*/
+        $debug && curl_setopt($ci, CURLOPT_HEADER, true); /*启用时会将头文件的信息作为数据流输出*/
         if (ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
-        	curl_setopt($ci, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ci, CURLOPT_FOLLOWLOCATION, 1);
         }
         curl_setopt($ci, CURLOPT_MAXREDIRS, 2);/*指定最多的HTTP重定向的数量，这个选项是和CURLOPT_FOLLOWLOCATION一起使用的*/
         curl_setopt($ci, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ci, CURLINFO_HEADER_OUT, true);
         /*curl_setopt($ci, CURLOPT_COOKIE, $Cookiestr); * *COOKIE带过去** */
         $response = curl_exec($ci);
-        $requestinfo = curl_getinfo($ci);
-        $http_code = curl_getinfo($ci, CURLINFO_HTTP_CODE);
         if ($debug) {
-            echo "=====post data======\r\n";
-            var_dump($params);
-            echo "=====info===== \r\n";
-            print_r($requestinfo);
-            echo "=====response=====\r\n";
-            print_r($response);
+            $requestinfo = curl_getinfo($ci);
+            !empty($requestinfo['request_header']) && $requestinfo['request_header'] = self::httpParseHeaders($requestinfo['request_header']);
+            $headerSize = curl_getinfo($ci, CURLINFO_HEADER_SIZE);
+            $headerString = substr($response, 0, $headerSize);
+
+            $response = substr($response, $headerSize);
+            $response = [
+                'params' => $params,
+                'request_info' => $requestinfo,
+                'response' => $response,
+                'response_header' => self::httpParseHeaders($headerString),
+            ];
         }
         curl_close($ci);
         return $response;
-        //return array($http_code, $response,$requestinfo);
+    }
+
+    /**
+     * [httpParseHeaders 解析header头]
+     * @param  [type] $headerString [header头字符串]
+     * @return [type]               [description]
+     */
+    private static function httpParseHeaders($headerString)
+    {
+        $headers = [];
+        $lines = explode("\r\n", $headerString);
+        foreach ($lines as $line) {
+            if ($line = trim($line)) {
+                $parts = explode(':', $line, 2);
+                $key = trim($parts[0]);
+                $value = isset($parts[1]) ? trim($parts[1]) : '';
+                $headers[$key] = $value;
+            }
+        }
+        return $headers;
     }
 
 }
