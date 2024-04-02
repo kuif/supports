@@ -66,7 +66,7 @@ class Http
                 if (!empty($params)) {
                     if (is_array($params)) {
                         foreach ($params as $k => $v) {
-                            if("@" == substr($v, 0, 1)) { //判断是不是文件上传（文件上传用multipart/form-data）
+                            if(!is_array($v) && "@" == substr($v, 0, 1)) { //判断是不是文件上传（文件上传用multipart/form-data）
                                 $postMultipart = true;
                                 if(class_exists('\CURLFile')){
                                     $params[$k] = new \CURLFile(substr($v, 1));
