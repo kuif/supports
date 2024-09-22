@@ -3,7 +3,7 @@
  * @Author: [FENG] <1161634940@qq.com>
  * @Date:   2020-10-14T14:29:57+08:00
  * @Last Modified by:   [FENG] <1161634940@qq.com>
- * @Last Modified time: 2023-12-27 16:55:37
+ * @Last Modified time: 2024-09-22 16:41:51
  */
 namespace fengkui\Supports;
 
@@ -60,6 +60,12 @@ class Http
         curl_setopt($ci, CURLOPT_CONNECTTIMEOUT, $timeout); /* 在发起连接前等待的时间，如果设置为0，则无限等待 */
         curl_setopt($ci, CURLOPT_TIMEOUT, 7); /* 设置cURL允许执行的最长秒数 */
         curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
+
+        in_array($method, ['PUT', 'DELETE']) && $headers[] = 'Content-Type:application/json';
+        if ($params && is_array($params) && array_intersect(['Content-Type:application/json', 'Content-Type: application/json'], $headers)) {
+            $params = json_encode($params, JSON_UNESCAPED_UNICODE);
+        }
+
         switch ($method) {
             case "POST":
                 curl_setopt($ci, CURLOPT_POST, TRUE);
@@ -86,8 +92,12 @@ class Http
                 }
                 break;
             default:
-                $query_string = is_array($params) ? http_build_query($params) : $params;
-                $url = $query_string ? $url . (stripos($url, "?") !== false ? "&" : "?") . $query_string : $url;
+                if (in_array($method, ['PUT', 'DELETE'])) {
+                    curl_setopt($ci, CURLOPT_POSTFIELDS, $params);
+                } else {
+                    $query_string = is_array($params) ? http_build_query($params) : $params;
+                    $url = $query_string ? $url . (stripos($url, "?") !== false ? "&" : "?") . $query_string : $url;
+                }
                 curl_setopt($ci, CURLOPT_CUSTOMREQUEST, $method); /* //设置请求方式 */
                 break;
         }
